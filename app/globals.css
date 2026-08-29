@@ -1,26 +1,34 @@
-@import "tailwindcss";
+/* src/app/globals.css */
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #FAFAF7;
+  color: #101613;
+  font-family: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* 규칙 5 — 움직이는 건 살아있는 것뿐. 진행 중 표시 점 하나에만 씁니다. */
+@keyframes rt-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: .35; }
+}
+.live-dot { animation: rt-pulse 2.6s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .live-dot { animation: none; }
+  * { transition-duration: .001ms !important; }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* 키보드 포커스는 항상 보이게 */
+:focus-visible {
+  outline: 2px solid #146B4E;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+input::placeholder { color: #B4BDB6; }
