@@ -35,34 +35,23 @@ input::placeholder { color: #B4BDB6; }
 
 /* 모바일 반응형 통합 대응 (화면 폭 768px 이하) */
 @media (max-width: 768px) {
-  /* 1. 헤더: 패딩 줄이고 줄바꿈 허용 (우측 삐져나감 방지) */
+  /* 1. 상단 헤더: 공간 확보를 위해 How it works 숨김 + 1줄 단정 배치 */
   header {
     padding: 14px 16px !important;
-    gap: 10px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
   }
   header nav {
-    gap: 12px !important;
+    gap: 10px !important;
     font-size: 13px !important;
-    flex-wrap: wrap !important;
+    flex-wrap: nowrap !important;
+  }
+  header nav a:first-child {
+    display: none !important;
   }
 
-  /* 2. 메인 문장 빌더: 거대한 글자 크기를 화면 비율에 맞게 축소 */
-  main h1,
-  main div[style*="Newsreader"],
-  main span[style*="Newsreader"],
-  main p[style*="Newsreader"] {
-    font-size: clamp(28px, 7vw, 36px) !important;
-    line-height: 1.35 !important;
-  }
-
-  /* 3. 드롭다운 선택 칩 버튼 크기 축소 */
-  button[style*="Newsreader"],
-  div[style*="Newsreader"] button {
-    font-size: clamp(24px, 6vw, 30px) !important;
-    padding: 2px 10px !important;
-  }
-
-  /* 4. 메인 가로 스크롤 방지 및 좌우 여백 */
+  /* 2. 메인 가로 스크롤 차단 및 좌우 여백 */
   main {
     overflow-x: hidden !important;
   }
@@ -71,7 +60,25 @@ input::placeholder { color: #B4BDB6; }
     padding-right: 16px !important;
   }
 
-  /* 5. 온보딩 및 로그인 카드 여백 조정 */
+  /* 3. CTA 버튼: 가로폭 100% 채우기 & 텍스트 중앙 정렬 */
+  div[style*="alignItems: center; gap: 22"],
+  div[style*="align-items: center; gap: 22"] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+  div[style*="alignItems: center; gap: 22"] button,
+  div[style*="align-items: center; gap: 22"] button {
+    width: 100% !important;
+    text-align: center !important;
+  }
+  div[style*="alignItems: center; gap: 22"] span,
+  div[style*="align-items: center; gap: 22"] span {
+    text-align: center !important;
+  }
+
+  /* 4. 온보딩 및 로그인 카드 여백 조정 */
   div[style*="max-width: 520px"],
   div[style*="max-width: 460px"],
   div[style*="max-width: 400px"] {
@@ -80,12 +87,12 @@ input::placeholder { color: #B4BDB6; }
     margin: 0 12px !important;
   }
 
-  /* 6. 관심분야 Layer1, Layer2 드롭다운 세로 2단 배치 */
+  /* 5. 관심분야 Layer1, Layer2 드롭다운 세로 2단 배치 */
   div[style*="display: flex; gap: 8px"] {
     flex-direction: column !important;
   }
 
-  /* 7. 스터디룸(화상회의 + 채팅) 세로 분할 전환 */
+  /* 6. 스터디룸(화상회의 + 채팅) 세로 분할 전환 */
   div[style*="height: calc(100vh - 145px)"] {
     flex-direction: column !important;
     height: auto !important;

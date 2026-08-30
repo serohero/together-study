@@ -87,14 +87,14 @@ export function SentenceBuilder() {
         : `${total} room${total === 1 ? "" : "s"} match so far`;
 
   return (
-      <section
-        style={{
-          padding: "clamp(48px, 8vw, 92px) clamp(16px, 4vw, 56px) 0",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
+    <section
+      style={{
+        padding: "clamp(48px, 8vw, 92px) clamp(16px, 4vw, 56px) 0",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
       <div
         style={{
           width: "100%",
@@ -104,30 +104,31 @@ export function SentenceBuilder() {
           gap: 44,
         }}
       >
-        {/* ---------------- 문장 ---------------- */}
-        <p
+        {/* ---------------- 문장 (모바일 최적화 정렬) ---------------- */}
+        <div
           style={{
-            margin: 0,
             fontFamily: font.display,
             fontWeight: 300,
-            fontSize: "clamp(26px, 5.5vw, 46px)",
-            lineHeight: 1.35,
+            fontSize: "clamp(22px, 5.2vw, 42px)",
+            lineHeight: 1.5,
             letterSpacing: "-0.015em",
             color: c.ink,
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: "8px 10px",
           }}
         >
-          I want to get better at{" "}
-          <span style={{ position: "relative", display: "inline-block" }}>
-            <Chip
-              label={topicLabel(draft)}
-              filled={Boolean(sub)}
-              open={open === "topic"}
-              onClick={() => setOpen(open === "topic" ? null : "topic")}
-              ariaLabel={`Topic: ${topicLabel(draft)}. Click to change.`}
-            />
-          </span>{" "}
-          through{" "}
-          <span style={{ position: "relative", display: "inline-block" }}>
+          <span>I want to get better at</span>
+          <Chip
+            label={topicLabel(draft)}
+            filled={Boolean(sub)}
+            open={open === "topic"}
+            onClick={() => setOpen(open === "topic" ? null : "topic")}
+            ariaLabel={`Topic: ${topicLabel(draft)}. Click to change.`}
+          />
+          <span>through</span>
+          <div style={{ position: "relative", display: "inline-block" }}>
             <Chip
               label={formatLabel(draft)}
               filled={draft.format !== null}
@@ -142,9 +143,9 @@ export function SentenceBuilder() {
               selected={draft.format}
               counts={counts}
             />
-          </span>{" "}
-          meeting{" "}
-          <span style={{ position: "relative", display: "inline-block" }}>
+          </div>
+          <span>meeting</span>
+          <div style={{ position: "relative", display: "inline-block" }}>
             <Chip
               label={timeLabel(draft)}
               filled={draft.weekday !== null || draft.daypart !== null}
@@ -160,9 +161,9 @@ export function SentenceBuilder() {
               onChange={pickTime}
               timeZone={timeZone}
             />
-          </span>{" "}
-          every week.
-        </p>
+          </div>
+          <span>every week.</span>
+        </div>
 
         {/* 주제 피커는 팝오버가 아니라 문장 아래 패널로 엽니다 — 84개를 담아야 하니까 */}
         {open === "topic" && (
