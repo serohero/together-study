@@ -124,7 +124,7 @@ const FILES: RoomFile[] = [
   { id: "f4", name: "Weekly_Goals_Tracker.xlsx", icon: "📊", size: "48 KB", owner: "Ana P." },
 ];
 
-/* ---------- breakpoint hook ---------- */
+/* ---------- breakpoint / motion hooks ---------- */
 
 function useIsBelow(breakpoint: number) {
   const [isBelow, setIsBelow] = useState(false);
@@ -136,6 +136,18 @@ function useIsBelow(breakpoint: number) {
     return () => mql.removeEventListener("change", update);
   }, [breakpoint]);
   return isBelow;
+}
+
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduced(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, []);
+  return reduced;
 }
 
 function formatClock(totalMin: number) {
@@ -187,6 +199,17 @@ export default function RoomDetail({ roomId }: { roomId: string }) {
         color: c.ink,
       }}
     >
+      {/* glanceable stage color, visible even before reading any text */}
+      <div
+        style={{
+          height: 4,
+          width: "100%",
+          flexShrink: 0,
+          background: activeStage.accentColor,
+          transition: "background .3s ease",
+        }}
+      />
+
       <StageBar
         roomId={roomId}
         elapsedMin={elapsedMin}
@@ -234,27 +257,44 @@ function StageBar({
   onJump: (s: Stage) => void;
   isMobile: boolean;
 }) {
+  const reducedMotion = usePrefersReducedMotion();
   const statusColor = playing ? c.live : c.wait;
   const statusText = playing ? "Live" : "Paused";
+  const dotAnimation =
+    playing && !reducedMotion ? "roomDetailLivePulse 1.6s ease-in-out infinite" : "none";
 
   return (
     <header
       style={{
-        padding: isMobile ? "14px 14px 12px" : "18px 22px 16px",
+        padding: isMobile ? "18px 18px 18px" : "26px 26px 26px",
         borderBottom: `1px solid ${c.hair}`,
+        boxShadow: "0 10px 18px -16px rgba(16,22,19,.35)",
         display: "flex",
         flexDirection: "column",
-        gap: 14,
+        gap: isMobile ? 16 : 20,
+        position: "relative",
+        zIndex: 1,
       }}
     >
+      {/* keyframes for the live-status dot — no CSS file / styled-jsx needed */}
+      <style>{`@keyframes roomDetailLivePulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }`}</style>
+
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
         <div style={{ minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontFamily: font.display, fontSize: 16, fontWeight: 560 }}>
+            <span style={{ fontFamily: font.display, fontSize: 18, fontWeight: 650 }}>
               Dawn Study Crew
             </span>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 4, ...label, color: statusColor }}>
-              <span style={{ width: 6, height: 6, borderRadius: 999, background: statusColor }} />
+              <span
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: 999,
+                  background: statusColor,
+                  animation: dotAnimation,
+                }}
+              />
               {statusText}
             </span>
           </div>
@@ -269,16 +309,17 @@ function StageBar({
           <div
             style={{
               fontFamily: font.mono,
-              fontSize: isMobile ? 13 : 15,
+              fontSize: isMobile ? 15 : 19,
               fontWeight: 600,
               fontVariantNumeric: "tabular-nums",
               color: c.ink,
               background: c.ground,
-              border: `1px solid ${c.hair}`,
-              padding: isMobile ? "5px 9px" : "6px 11px",
+              border: `1.5px solid ${activeStage.accentColor}`,
+              padding: isMobile ? "6px 11px" : "8px 15px",
               borderRadius: 999,
-              minWidth: isMobile ? 54 : 64,
+              minWidth: isMobile ? 60 : 76,
               textAlign: "center",
+              transition: "border-color .3s ease",
             }}
           >
             {formatClock(elapsedMin)}
@@ -292,7 +333,7 @@ function StageBar({
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: 6, width: "100%" }}>
+      <div style={{ display: "flex", gap: 10, width: "100%" }}>
         {STAGES.map((stage) => {
           const isActive = stage.key === activeStage.key;
           const isDone = elapsedMin >= stage.endMin;
@@ -309,55 +350,68 @@ function StageBar({
               onClick={() => onJump(stage)}
               style={{
                 ...resetButton,
-                position: "relative",
                 flex: stage.endMin - stage.startMin,
-                border: `1px solid ${isActive ? stage.accentColor : c.hair}`,
-                borderRadius: 10,
-                padding: "9px 12px",
-                overflow: "hidden",
+                border: `1.5px solid ${isActive ? stage.accentColor : c.hair}`,
+                borderRadius: 14,
+                padding: isMobile ? "14px 14px" : "17px 18px",
                 display: "flex",
                 flexDirection: "column",
-                gap: 5,
-                background: c.card,
-                transition: "border-color .2s ease",
+                gap: 9,
+                background: isActive ? stage.accentColor : c.card,
+                boxShadow: isActive ? shadow.card : "none",
+                transform: isActive ? "translateY(-2px)" : "none",
+                opacity: !isActive && isDone ? 0.68 : 1,
+                transition:
+                  "background .25s ease, border-color .25s ease, transform .25s ease, box-shadow .25s ease",
               }}
             >
               <span
                 style={{
-                  position: "absolute",
-                  inset: 0,
-                  width: `${pct}%`,
-                  background: stage.tintColor,
-                  opacity: isDone ? 0.6 : 1,
-                  transition: "width .25s linear",
-                }}
-              />
-              <span
-                style={{
-                  position: "relative",
                   display: "flex",
                   alignItems: "center",
-                  gap: 6,
-                  fontSize: 12.5,
-                  fontWeight: 600,
-                  color: isActive ? c.ink : c.ink2,
+                  gap: 8,
+                  fontSize: isActive ? 15.5 : 14,
+                  fontWeight: isActive ? 700 : 600,
+                  color: isActive ? "#FFFFFF" : c.ink2,
                 }}
               >
-                <span style={{ fontSize: 14, lineHeight: 1 }}>{stage.icon}</span>
+                <span style={{ fontSize: isActive ? 20 : 16, lineHeight: 1 }}>{stage.icon}</span>
                 {stage.title}
               </span>
+
               {!isMobile && (
                 <span
                   style={{
-                    position: "relative",
                     ...label,
-                    fontSize: 10.5,
-                    color: isActive ? stage.accentColor : c.ink3,
+                    fontSize: 11,
+                    fontWeight: isActive ? 600 : undefined,
+                    color: isActive ? "rgba(255,255,255,0.85)" : c.ink3,
                   }}
                 >
                   {stage.startMin}–{stage.endMin} min
                 </span>
               )}
+
+              <span
+                style={{
+                  position: "relative",
+                  height: 4,
+                  borderRadius: 999,
+                  background: isActive ? "rgba(255,255,255,.3)" : c.hairSoft,
+                  overflow: "hidden",
+                }}
+              >
+                <span
+                  style={{
+                    position: "absolute",
+                    inset: "0 auto 0 0",
+                    width: `${pct}%`,
+                    background: isActive ? "#FFFFFF" : isDone ? stage.accentColor : c.ink4,
+                    borderRadius: 999,
+                    transition: "width .25s linear",
+                  }}
+                />
+              </span>
             </button>
           );
         })}
@@ -524,6 +578,8 @@ function VideoStage({ roomId, activeStage }: { roomId: string; activeStage: Stag
         )}
       </div>
 
+      <GuideBanner stage={activeStage} />
+
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
         <button
           onClick={() => router.push("/")}
@@ -542,11 +598,34 @@ function VideoStage({ roomId, activeStage }: { roomId: string; activeStage: Stag
           Leave
         </button>
       </div>
-
-      <div style={{ textAlign: "center", fontSize: 12.5, color: c.ink3, fontFamily: font.mono }}>
-        {activeStage.caption}
-      </div>
     </section>
+  );
+}
+
+/** Bold, colored "what's happening right now" banner — replaces the old small caption line */
+function GuideBanner({ stage }: { stage: Stage }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 13,
+        padding: "14px 18px",
+        borderRadius: 12,
+        background: stage.tintColor,
+        transition: "background .3s ease",
+      }}
+    >
+      <span style={{ fontSize: 24, lineHeight: 1, flexShrink: 0 }}>{stage.icon}</span>
+      <div style={{ minWidth: 0 }}>
+        <div style={{ ...label, marginBottom: 3, color: stage.accentColor }}>
+          Now · {stage.title}
+        </div>
+        <div style={{ fontSize: 14.5, fontWeight: 600, color: c.ink, lineHeight: 1.42 }}>
+          {stage.caption}
+        </div>
+      </div>
+    </div>
   );
 }
 
