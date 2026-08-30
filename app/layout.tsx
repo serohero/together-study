@@ -1,12 +1,18 @@
-// src/app/layout.tsx
+// app/layout.tsx
 
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Roundtable — study anything, same time, same people",
   description:
     "Find a small group that meets on a schedule, on a topic you chose, and actually keeps meeting.",
+};
+
+// 📱 모바일 브라우저 기기 너비 최적화 설정 추가
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({

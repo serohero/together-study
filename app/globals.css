@@ -32,3 +32,49 @@ html, body {
 }
 
 input::placeholder { color: #B4BDB6; }
+
+/* 모바일 반응형 대응 (화면 폭 768px 이하) */
+@media (max-width: 768px) {
+  /* 헤더 패딩 줄이기 & 로고 크기 축소 */
+  header {
+    padding: 16px 20px !important;
+  }
+  header nav {
+    gap: 14px !important;
+    font-size: 13px !important;
+  }
+
+  /* 온보딩 및 로그인 카드 여백 조정 */
+  div[style*="max-width: 520px"],
+  div[style*="max-width: 460px"],
+  div[style*="max-width: 400px"] {
+    max-width: 100% !important;
+    padding: 24px 18px !important;
+    margin: 0 12px !important;
+  }
+
+  /* 관심분야 Layer1, Layer2 드롭다운을 모바일에서는 세로로 2단 배치 */
+  div[style*="display: flex; gap: 8px"] {
+    flex-direction: column !important;
+  }
+
+  /* 스터디룸(화상회의 + 채팅) 2단 분할 레이아웃을 세로 스택으로 전환 */
+  div[style*="height: calc(100vh - 145px)"] {
+    flex-direction: column !important;
+    height: auto !important;
+  }
+
+  /* 화상 iframe 영역 높이 고정 */
+  div[style*="flex: 2; border-right"] {
+    border-right: none !important;
+    border-bottom: 1px solid #E5E7EB !important;
+    height: 380px !important;
+  }
+
+  /* 채팅 패널 높이 확보 */
+  div[style*="min-width: 320px"] {
+    max-width: 100% !important;
+    min-width: 100% !important;
+    height: 450px !important;
+  }
+}
