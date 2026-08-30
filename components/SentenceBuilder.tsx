@@ -87,14 +87,14 @@ export function SentenceBuilder() {
         : `${total} room${total === 1 ? "" : "s"} match so far`;
 
   return (
-    <section
-      style={{
-        padding: "92px 56px 0",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-      }}
-    >
+      <section
+        style={{
+          padding: "clamp(48px, 8vw, 92px) clamp(16px, 4vw, 56px) 0",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
       <div
         style={{
           width: "100%",
@@ -110,13 +110,13 @@ export function SentenceBuilder() {
             margin: 0,
             fontFamily: font.display,
             fontWeight: 300,
-            fontSize: 46,
-            lineHeight: 1.42,
+            fontSize: "clamp(26px, 5.5vw, 46px)",
+            lineHeight: 1.35,
             letterSpacing: "-0.015em",
             color: c.ink,
           }}
         >
-          I want to get better at
+          I want to get better at{" "}
           <span style={{ position: "relative", display: "inline-block" }}>
             <Chip
               label={topicLabel(draft)}
@@ -125,8 +125,8 @@ export function SentenceBuilder() {
               onClick={() => setOpen(open === "topic" ? null : "topic")}
               ariaLabel={`Topic: ${topicLabel(draft)}. Click to change.`}
             />
-          </span>
-          through
+          </span>{" "}
+          through{" "}
           <span style={{ position: "relative", display: "inline-block" }}>
             <Chip
               label={formatLabel(draft)}
@@ -142,8 +142,8 @@ export function SentenceBuilder() {
               selected={draft.format}
               counts={counts}
             />
-          </span>
-          meeting
+          </span>{" "}
+          meeting{" "}
           <span style={{ position: "relative", display: "inline-block" }}>
             <Chip
               label={timeLabel(draft)}
@@ -160,7 +160,7 @@ export function SentenceBuilder() {
               onChange={pickTime}
               timeZone={timeZone}
             />
-          </span>
+          </span>{" "}
           every week.
         </p>
 
