@@ -75,7 +75,7 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
 
         {user ? (
           <>
-            <Link href="/onboarding" prefetch={false} style={{ color: c.ink2, textDecoration: "none" }}>
+            <Link href="/my_profile" prefetch={false} style={{ color: c.ink2, textDecoration: "none" }}>
               Profile
             </Link>
             <button
