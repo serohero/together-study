@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  maximumScale: 1, // <- 이 줄만 추가
 };
 
 export default function RootLayout({

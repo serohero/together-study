@@ -149,34 +149,30 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
         style={{
           display: "flex",
           alignItems: "center",
-          gap: isMobile ? 14 : 28,
+          gap: isMobile ? 12 : 24,
           fontFamily: font.ui,
           fontSize: isMobile ? 13.5 : 14.5,
           flexShrink: 0,
         }}
       >
-        {user && (
+        {/* 로그인 상태 + 방이 있을 때 Study Room 메뉴 */}
+        {user && hasRooms && (
           <div ref={pickerRef} style={{ position: "relative" }}>
             <button
               type="button"
               onClick={handleStudyRoomClick}
               disabled={!studyRoomEnabled}
-              title={
-                !hasRooms
-                  ? "You haven't registered a study yet"
-                  : undefined
-              }
               style={{
                 background: "none",
                 border: "none",
                 padding: 0,
-                color: studyRoomEnabled ? c.ink2 : c.ink4,
+                color: c.ink2,
                 fontFamily: font.ui,
                 fontSize: isMobile ? 13.5 : 14.5,
-                cursor: studyRoomEnabled ? "pointer" : "not-allowed",
+                cursor: "pointer",
               }}
             >
-              Study room
+              Room
             </button>
 
             {pickerOpen && myRooms.length > 1 && (
@@ -185,8 +181,8 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
                   position: "absolute",
                   top: "calc(100% + 12px)",
                   right: 0,
-                  minWidth: isMobile ? 200 : 240,
-                  maxWidth: 300,
+                  minWidth: 200,
+                  maxWidth: 280,
                   background: c.card,
                   border: `1px solid ${c.hair}`,
                   borderRadius: 10,
@@ -231,20 +227,26 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
           </div>
         )}
 
-        {/* 모바일에서는 공간 확보를 위해 How it works 숨김 */}
+        {/* PC 화면에서만 보이는 How it works */}
         {!isMobile && (
           <Link href="/how-it-works" prefetch={false} style={{ color: c.ink2, textDecoration: "none" }}>
             How it works
           </Link>
         )}
 
+        {/* 로그인 여부에 따른 Profile / Log in 버튼 (모바일에서도 항상 노출) */}
         {user ? (
           <>
-            <Link href="/my_profile" prefetch={false} style={{ color: c.ink2, textDecoration: "none" }}>
+            <Link
+              href="/my_profile"
+              prefetch={false}
+              style={{ color: c.ink, fontWeight: 500, textDecoration: "none" }}
+            >
               Profile
             </Link>
             {!isMobile && (
               <button
+                type="button"
                 onClick={handleLogout}
                 style={{
                   background: "none",
@@ -261,21 +263,33 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
             )}
           </>
         ) : (
-          <Link href="/login" prefetch={false} style={{ color: c.ink2, textDecoration: "none" }}>
+          <Link
+            href="/login"
+            prefetch={false}
+            style={{
+              color: c.ink,
+              fontWeight: 500,
+              textDecoration: "none",
+              padding: isMobile ? "4px 6px" : 0,
+            }}
+          >
             Log in
           </Link>
         )}
 
+        {/* Start a room (+ Room) 버튼 */}
         <Link
           href="/rooms/new"
           prefetch={false}
           style={{
             color: c.ink,
-            fontWeight: 550,
+            fontWeight: 600,
             textDecoration: "none",
-            background: isMobile ? c.accentTint2 : "transparent",
-            padding: isMobile ? "6px 10px" : "0",
+            background: isMobile ? "#EBF1EC" : "transparent",
+            border: isMobile ? `1px solid ${c.hair}` : "none",
+            padding: isMobile ? "6px 12px" : "0",
             borderRadius: isMobile ? 6 : 0,
+            whiteSpace: "nowrap",
           }}
         >
           {isMobile ? "+ Room" : "Start a room"}
