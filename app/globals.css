@@ -47,9 +47,6 @@ input::placeholder { color: #B4BDB6; }
     font-size: 13px !important;
     flex-wrap: nowrap !important;
   }
-  header nav a:first-child {
-    display: none !important;
-  }
 
   /* 2. 메인 가로 스크롤 차단 및 좌우 여백 */
   main {
