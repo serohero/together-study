@@ -1,10 +1,7 @@
 // src/components/SentenceBuilder.tsx
-// 홈의 전부. 팀이 정한 3단계(카테고리 → 서브카테고리 → 포맷)를 그대로 두고,
-// 화면 세 군데에 흩어놓는 대신 문장 하나의 빈칸 셋으로 모았습니다.
-
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Chip } from "./Chip";
 import { TopicPicker } from "./TopicPicker";
@@ -43,8 +40,15 @@ export function SentenceBuilder() {
   const router = useRouter();
   const [draft, setDraft] = useState<SearchQuery>(EMPTY_QUERY);
   const [open, setOpen] = useState<OpenPicker>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // 개수는 서버가 계산합니다. 포맷/시간을 바꾸면 주제별 숫자도 같이 바뀝니다.
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 640);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const { counts, total, loading } = useRoomCounts(draft);
 
   const timeZone = useMemo(() => {
@@ -89,10 +93,12 @@ export function SentenceBuilder() {
   return (
     <section
       style={{
-        padding: "clamp(48px, 8vw, 92px) clamp(16px, 4vw, 56px) 0",
+        padding: "clamp(36px, 7vw, 92px) clamp(16px, 4vw, 56px) 0",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        width: "100%",
+        boxSizing: "border-box",
       }}
     >
       <div
@@ -101,7 +107,8 @@ export function SentenceBuilder() {
           maxWidth: CONTENT_WIDTH - 100,
           display: "flex",
           flexDirection: "column",
-          gap: 44,
+          gap: isMobile ? 32 : 44,
+          boxSizing: "border-box",
         }}
       >
         {/* ---------------- 문장 (모바일 최적화 정렬) ---------------- */}
@@ -109,14 +116,16 @@ export function SentenceBuilder() {
           style={{
             fontFamily: font.display,
             fontWeight: 300,
-            fontSize: "clamp(22px, 5.2vw, 42px)",
-            lineHeight: 1.5,
+            fontSize: "clamp(20px, 5vw, 42px)",
+            lineHeight: 1.6,
             letterSpacing: "-0.015em",
             color: c.ink,
             display: "flex",
             flexWrap: "wrap",
             alignItems: "center",
             gap: "8px 10px",
+            width: "100%",
+            boxSizing: "border-box",
           }}
         >
           <span>I want to get better at</span>
@@ -128,7 +137,7 @@ export function SentenceBuilder() {
             ariaLabel={`Topic: ${topicLabel(draft)}. Click to change.`}
           />
           <span>through</span>
-          <div style={{ position: "relative", display: "inline-block" }}>
+          <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
             <Chip
               label={formatLabel(draft)}
               filled={draft.format !== null}
@@ -145,7 +154,7 @@ export function SentenceBuilder() {
             />
           </div>
           <span>meeting</span>
-          <div style={{ position: "relative", display: "inline-block" }}>
+          <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
             <Chip
               label={timeLabel(draft)}
               filled={draft.weekday !== null || draft.daypart !== null}
@@ -165,7 +174,7 @@ export function SentenceBuilder() {
           <span>every week.</span>
         </div>
 
-        {/* 주제 피커는 팝오버가 아니라 문장 아래 패널로 엽니다 — 84개를 담아야 하니까 */}
+        {/* 주제 피커 */}
         {open === "topic" && (
           <TopicPicker
             open
@@ -177,20 +186,39 @@ export function SentenceBuilder() {
           />
         )}
 
-        {/* ---------------- 행동 ---------------- */}
-        <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
+        {/* ---------------- 행동 (모바일 줄바꿈 & 너비 유동화) ---------------- */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: isMobile ? "flex-start" : "center",
+            flexDirection: isMobile ? "column" : "row",
+            gap: isMobile ? 12 : 22,
+            width: "100%",
+            boxSizing: "border-box",
+          }}
+        >
           <button
             type="button"
             onClick={() => go(draft)}
             style={{
               ...primaryButton,
-              padding: "16px 34px",
-              fontSize: 16.5,
+              padding: isMobile ? "14px 24px" : "16px 34px",
+              fontSize: isMobile ? 15 : 16.5,
+              width: isMobile ? "100%" : "auto",
+              textAlign: "center",
+              boxSizing: "border-box",
             }}
           >
             Show me the rooms
           </button>
-          <span style={{ fontFamily: font.ui, fontSize: 14.5, color: c.ink3 }}>
+          <span
+            style={{
+              fontFamily: font.ui,
+              fontSize: isMobile ? 13 : 14.5,
+              color: c.ink3,
+              lineHeight: 1.4,
+            }}
+          >
             {resultHint ?? "Free · no account needed to look"}
           </span>
         </div>
@@ -200,9 +228,11 @@ export function SentenceBuilder() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 14,
+            gap: isMobile ? "10px 12px" : 14,
             flexWrap: "wrap",
             paddingTop: 8,
+            width: "100%",
+            boxSizing: "border-box",
           }}
         >
           <span
@@ -211,6 +241,8 @@ export function SentenceBuilder() {
               fontSize: 10.5,
               letterSpacing: "0.14em",
               color: c.ink3,
+              width: isMobile ? "100%" : "auto",
+              marginBottom: isMobile ? 2 : 0,
             }}
           >
             BUSY THIS WEEK
@@ -233,7 +265,7 @@ export function SentenceBuilder() {
                 style={{
                   ...resetButton,
                   fontFamily: font.ui,
-                  fontSize: 14.5,
+                  fontSize: isMobile ? 13.5 : 14.5,
                   color: c.ink,
                   borderBottom: "1px solid #DDE3DC",
                   paddingBottom: 2,

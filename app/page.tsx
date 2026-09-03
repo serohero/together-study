@@ -8,7 +8,17 @@ import { c } from "@/components/tokens";
 
 export default function HomePage() {
   return (
-    <main style={{ background: c.ground, minHeight: "100vh" }}>
+    <main
+      style={{
+        background: c.ground,
+        minHeight: "100vh",
+        width: "100%",
+        maxWidth: "100vw",
+        overflowX: "hidden", // 내부 자식이 넘쳐도 화면 전체가 옆으로 밀리는 현상 차단
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <SiteHeader />
       <SentenceBuilder />
       <LiveStrip />
