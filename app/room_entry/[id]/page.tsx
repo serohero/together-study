@@ -5,7 +5,7 @@ import { use } from "react";
 import dynamic from "next/dynamic";
 
 // SSR 끄고 안전하게 마운트 (countdown/Date 로직이 클라이언트 전용)
-const RoomEntry = dynamic(() => import("../../../components/RoomEntry"), {
+const RoomOverview = dynamic(() => import("../../../components/RoomOverview"), {
   ssr: false,
   loading: () => (
     <div
@@ -27,5 +27,5 @@ export default function RoomEntryPage({
   params: Promise<{ id: string }> | { id: string };
 }) {
   const resolvedParams = params instanceof Promise ? use(params) : params;
-  return <RoomEntry roomId={resolvedParams.id} />;
+  return <RoomOverview roomId={resolvedParams.id} variant="entry" />;
 }
