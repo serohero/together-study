@@ -128,3 +128,27 @@ export interface RoomsResponse {
   total: number;
   counts: TaxonomyCounts;
 }
+
+/* ------------------------------------------------------------------ */
+/* Supabase 실제 테이블 타입 — 위의 Room은 /explore용 데모 시드 데이터고,   */
+/* 이건 study_rooms 테이블의 실제 컬럼입니다. 스키마가 늘어나면 여기만     */
+/* 고치면 됩니다.                                                       */
+/* ------------------------------------------------------------------ */
+
+export interface StudyRoomRow {
+  id: number;
+  leader_id: string | null;
+  title: string;
+  description: string | null;
+  industry_1: string | null;
+  industry_2: string | null;
+  study_type: string | null;
+  communication: string | null;
+  location_type: string | null;
+  location_city: string | null;
+  schedule: string | null;
+  current_members: number | null;
+  max_members: number | null;
+  contact_link: string | null;
+  created_at: string;
+}
