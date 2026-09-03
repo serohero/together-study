@@ -1,3 +1,4 @@
+// src/components/SiteHeader.tsx
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -13,7 +14,16 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
   const [user, setUser] = useState<any>(null);
   const [myRooms, setMyRooms] = useState<MyRoom[]>([]);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const pickerRef = useRef<HTMLDivElement>(null);
+
+  // 모바일 화면 감지 (640px 기준)
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 640);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -27,8 +37,6 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // 로그인한 사용자와 관련된 스터디룸 목록 (내가 리더인 방 + 멤버로 참여 중인 방).
-  // "Study room" 버튼 활성화 여부 + 여러 개일 때 고를 목록으로 씁니다.
   useEffect(() => {
     if (!user) {
       setMyRooms([]);
@@ -47,8 +55,6 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
 
       if (cancelled) return;
 
-      // 리더인 방과 참여 중인 방을 합치고, id 기준으로 중복을 제거합니다
-      // (리더가 자기 방의 멤버로도 등록돼 있는 경우 대비).
       const merged = new Map<number, MyRoom>();
       (led ?? []).forEach((room) => merged.set(room.id, room as MyRoom));
       (joined ?? []).forEach((row: any) => {
@@ -65,7 +71,6 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
     };
   }, [user]);
 
-  // 드롭다운 바깥을 클릭하면 닫습니다.
   useEffect(() => {
     if (!pickerOpen) return;
     const onClick = (e: MouseEvent) => {
@@ -100,17 +105,23 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: compact ? "22px 56px" : "24px 56px",
+        width: "100%",
+        maxWidth: "100vw",
+        boxSizing: "border-box",
+        // 모바일일 땐 좌우 16px 패딩, 데스크톱일 땐 기존 56px 유지
+        padding: isMobile ? "16px 16px" : compact ? "22px 56px" : "24px 56px",
       }}
     >
       <Link
         href="/"
+        prefetch={false}
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 11,
+          gap: 9,
           textDecoration: "none",
           color: c.ink,
+          flexShrink: 0,
         }}
       >
         <svg width={20} height={20} viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -123,7 +134,12 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
           <circle cx="5.9" cy="8.5" r="1.7" stroke="#B6C1B9" />
         </svg>
         <span
-          style={{ fontFamily: font.display, fontSize: 20, letterSpacing: "-0.01em" }}
+          style={{
+            fontFamily: font.display,
+            fontSize: isMobile ? 18 : 20,
+            letterSpacing: "-0.01em",
+            fontWeight: 500,
+          }}
         >
           Roundtable
         </span>
@@ -133,9 +149,10 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 28,
+          gap: isMobile ? 14 : 28,
           fontFamily: font.ui,
-          fontSize: 14.5,
+          fontSize: isMobile ? 13.5 : 14.5,
+          flexShrink: 0,
         }}
       >
         {user && (
@@ -155,7 +172,7 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
                 padding: 0,
                 color: studyRoomEnabled ? c.ink2 : c.ink4,
                 fontFamily: font.ui,
-                fontSize: 14.5,
+                fontSize: isMobile ? 13.5 : 14.5,
                 cursor: studyRoomEnabled ? "pointer" : "not-allowed",
               }}
             >
@@ -168,14 +185,14 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
                   position: "absolute",
                   top: "calc(100% + 12px)",
                   right: 0,
-                  minWidth: 240,
-                  maxWidth: 320,
+                  minWidth: isMobile ? 200 : 240,
+                  maxWidth: 300,
                   background: c.card,
                   border: `1px solid ${c.hair}`,
                   borderRadius: 10,
                   boxShadow: shadow.popover,
                   overflow: "hidden",
-                  zIndex: 20,
+                  zIndex: 30,
                 }}
               >
                 <div
@@ -200,7 +217,7 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
                       display: "block",
                       padding: "10px 14px",
                       fontFamily: font.ui,
-                      fontSize: 14,
+                      fontSize: 13.5,
                       color: c.ink,
                       textDecoration: "none",
                       borderTop: `1px solid ${c.hairSoft}`,
@@ -214,29 +231,34 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
           </div>
         )}
 
-        <Link href="/how-it-works" prefetch={false} style={{ color: c.ink2, textDecoration: "none" }}>
-          How it works
-        </Link>
+        {/* 모바일에서는 공간 확보를 위해 How it works 숨김 */}
+        {!isMobile && (
+          <Link href="/how-it-works" prefetch={false} style={{ color: c.ink2, textDecoration: "none" }}>
+            How it works
+          </Link>
+        )}
 
         {user ? (
           <>
             <Link href="/my_profile" prefetch={false} style={{ color: c.ink2, textDecoration: "none" }}>
               Profile
             </Link>
-            <button
-              onClick={handleLogout}
-              style={{
-                background: "none",
-                border: "none",
-                padding: 0,
-                cursor: "pointer",
-                color: c.ink2,
-                fontFamily: font.ui,
-                fontSize: 14.5,
-              }}
-            >
-              Log out
-            </button>
+            {!isMobile && (
+              <button
+                onClick={handleLogout}
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                  color: c.ink2,
+                  fontFamily: font.ui,
+                  fontSize: 14.5,
+                }}
+              >
+                Log out
+              </button>
+            )}
           </>
         ) : (
           <Link href="/login" prefetch={false} style={{ color: c.ink2, textDecoration: "none" }}>
@@ -247,9 +269,16 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
         <Link
           href="/rooms/new"
           prefetch={false}
-          style={{ color: c.ink, fontWeight: 500, textDecoration: "none" }}
+          style={{
+            color: c.ink,
+            fontWeight: 550,
+            textDecoration: "none",
+            background: isMobile ? c.accentTint2 : "transparent",
+            padding: isMobile ? "6px 10px" : "0",
+            borderRadius: isMobile ? 6 : 0,
+          }}
         >
-          Start a room
+          {isMobile ? "+ Room" : "Start a room"}
         </Link>
       </nav>
     </header>
