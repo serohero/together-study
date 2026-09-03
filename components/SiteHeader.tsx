@@ -27,7 +27,7 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // 로그인한 사용자가 등록(생성)한 스터디룸 목록.
+  // 로그인한 사용자와 관련된 스터디룸 목록 (내가 리더인 방 + 멤버로 참여 중인 방).
   // "Study room" 버튼 활성화 여부 + 여러 개일 때 고를 목록으로 씁니다.
   useEffect(() => {
     if (!user) {
@@ -35,14 +35,31 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
       return;
     }
     let cancelled = false;
-    supabase
-      .from("study_rooms")
-      .select("id, title")
-      .eq("leader_id", user.id)
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        if (!cancelled) setMyRooms((data as MyRoom[] | null) ?? []);
+
+    async function loadMyRooms() {
+      const [{ data: led }, { data: joined }] = await Promise.all([
+        supabase.from("study_rooms").select("id, title").eq("leader_id", user.id),
+        supabase
+          .from("study_room_members")
+          .select("study_rooms(id, title)")
+          .eq("user_id", user.id),
+      ]);
+
+      if (cancelled) return;
+
+      // 리더인 방과 참여 중인 방을 합치고, id 기준으로 중복을 제거합니다
+      // (리더가 자기 방의 멤버로도 등록돼 있는 경우 대비).
+      const merged = new Map<number, MyRoom>();
+      (led ?? []).forEach((room) => merged.set(room.id, room as MyRoom));
+      (joined ?? []).forEach((row: any) => {
+        const room = row.study_rooms as MyRoom | null;
+        if (room) merged.set(room.id, room);
       });
+
+      setMyRooms(Array.from(merged.values()));
+    }
+
+    void loadMyRooms();
     return () => {
       cancelled = true;
     };
