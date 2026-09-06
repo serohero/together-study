@@ -44,7 +44,7 @@ export const Chip = forwardRef<HTMLButtonElement, ChipProps>(function Chip(
         padding: hero ? "1px 14px 4px" : "9px 16px",
         margin: hero ? "0 4px" : 0,
         fontFamily: hero ? font.display : font.ui,
-        fontWeight: hero ? 400 : 600,
+        fontWeight: 600,
         fontSize: hero ? "inherit" : 16,
         lineHeight: hero ? 1.18 : 1.2,
         transition: "background 140ms ease, color 140ms ease",

@@ -10,6 +10,7 @@ html, body {
   font-family: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-synthesis: none;
 }
 
 /* 규칙 5 — 움직이는 건 살아있는 것뿐. 진행 중 표시 점 하나에만 씁니다. */
@@ -106,4 +107,119 @@ input::placeholder { color: #B4BDB6; }
     min-width: 100% !important;
     height: 450px !important;
   }
+}
+
+/* ---------------------------------------------------------------------
+   재사용 인터랙션 클래스 (버튼 눌림 피드백 / 링크·아이콘 호버 / 카드 hover 등)
+   인라인 스타일로는 :hover, :active를 못 넣어서 여기 모아둡니다.
+   --------------------------------------------------------------------- */
+
+.rt-nav-link {
+  transition: color 150ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .rt-nav-link:hover {
+    color: #101613 !important;
+  }
+}
+
+.rt-icon-btn {
+  cursor: pointer;
+  transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1), background-color 150ms ease;
+}
+.rt-icon-btn:active {
+  transform: scale(0.92);
+}
+@media (hover: hover) and (pointer: fine) {
+  .rt-icon-btn:hover {
+    background: #F1F2EF;
+  }
+}
+
+.rt-btn-chip {
+  transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1), background-color 150ms ease;
+}
+.rt-btn-chip:active {
+  transform: scale(0.96);
+}
+@media (hover: hover) and (pointer: fine) {
+  .rt-btn-chip:hover {
+    background: #EAF3EE !important;
+  }
+}
+
+.rt-btn-primary {
+  transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1), background-color 150ms ease;
+}
+.rt-btn-primary:active {
+  transform: scale(0.97);
+}
+@media (hover: hover) and (pointer: fine) {
+  .rt-btn-primary:hover {
+    background: #0E5039 !important;
+  }
+}
+
+.rt-see-link .rt-arrow {
+  display: inline-block;
+  transition: transform 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .rt-see-link:hover .rt-arrow {
+    transform: translateX(3px);
+  }
+}
+
+.rt-room-card {
+  transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .rt-room-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(16, 22, 19, 0.08);
+  }
+}
+
+.rt-tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+.rt-menu-dropdown {
+  transform-origin: top right;
+  animation: rt-menu-in 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+@keyframes rt-menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rt-menu-dropdown {
+    animation: none;
+  }
+}
+
+.rt-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .rt-menu-item:hover {
+    background: #F1F2EF;
+  }
+}
+.rt-menu-item:active {
+  background: #EAF3EE;
 }

@@ -610,7 +610,7 @@ export default function RoomOverview({
                 {isEntry ? (
                   <button
                     type="button"
-                    className={`room-entry-btn${entryUnlocked ? " active" : ""}`}
+                    className={`rt-btn-primary room-entry-btn${entryUnlocked ? " active" : ""}`}
                     disabled={!entryUnlocked}
                     onClick={() => entryUnlocked && router.push(`/study_room/${room.id}`)}
                     style={{
@@ -636,6 +636,7 @@ export default function RoomOverview({
                     type="button"
                     onClick={handleClaimSeat}
                     disabled={claimDisabled}
+                    className="rt-btn-primary"
                     style={{
                       width: "100%",
                       height: 50,

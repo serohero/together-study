@@ -71,6 +71,7 @@ export function LiveStrip() {
               aria-hidden="true"
             />
             <p
+              className="rt-tnum"
               style={{
                 margin: 0,
                 fontFamily: font.ui,
@@ -92,6 +93,7 @@ export function LiveStrip() {
           <Link
             href="/explore"
             prefetch={false}
+            className="rt-nav-link rt-see-link"
             style={{
               fontFamily: font.ui,
               fontSize: isMobile ? 13.5 : 14.5,
@@ -100,7 +102,7 @@ export function LiveStrip() {
               flexShrink: 0,
             }}
           >
-            See what&apos;s on →
+            See what&apos;s on <span className="rt-arrow">→</span>
           </Link>
         </div>
 
@@ -128,6 +130,7 @@ export function LiveStrip() {
               }}
             >
               <span
+                className="rt-tnum"
                 style={{
                   fontFamily: font.mono,
                   fontSize: 10.5,
@@ -150,6 +153,7 @@ export function LiveStrip() {
                 {r.title}
               </span>
               <span
+                className="rt-tnum"
                 style={{
                   fontFamily: font.ui,
                   fontSize: isMobile ? 12 : 13,

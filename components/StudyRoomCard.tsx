@@ -36,6 +36,7 @@ export function StudyRoomCard({ room }: { room: StudyRoomRow }) {
 
   return (
     <article
+      className="rt-room-card"
       style={{
         background: c.card,
         borderRadius: 11,
@@ -91,7 +92,7 @@ export function StudyRoomCard({ room }: { room: StudyRoomRow }) {
           marginTop: 2,
         }}
       >
-        <span style={{ fontFamily: font.ui, fontSize: 14, color: full ? c.ink3 : c.ink2 }}>
+        <span className="rt-tnum" style={{ fontFamily: font.ui, fontSize: 14, color: full ? c.ink3 : c.ink2 }}>
           {full ? "Full" : `${seatsLeft} seat${seatsLeft === 1 ? "" : "s"} left`}
           <span style={{ color: c.ink4 }}>
             {" "}
@@ -101,6 +102,7 @@ export function StudyRoomCard({ room }: { room: StudyRoomRow }) {
         <Link
           href={`/room_detail/${room.id}`}
           prefetch={false}
+          className="rt-btn-primary"
           style={{
             background: c.accent,
             color: "#FFFFFF",
@@ -110,6 +112,7 @@ export function StudyRoomCard({ room }: { room: StudyRoomRow }) {
             fontSize: 13.5,
             fontWeight: 600,
             textDecoration: "none",
+            display: "inline-block",
           }}
         >
           View room

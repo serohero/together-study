@@ -2,6 +2,7 @@
 
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { PageTransition } from "@/components/PageTransition";
 
 export const metadata: Metadata = {
   title: "Roundtable — study anything, same time, same people",
@@ -29,7 +30,9 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500&display=swap"
         />
       </head>
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <PageTransition>{children}</PageTransition>
+      </body>
     </html>
   );
 }

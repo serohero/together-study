@@ -16,6 +16,7 @@ import {
   timeLabel,
   topicLabel,
 } from "@/lib/query";
+import { FORMATS, DAYPARTS } from "@/lib/types";
 import type {
   DaypartId,
   FormatId,
@@ -36,6 +37,22 @@ const QUICK_PICKS: { label: string; topic: string; format?: FormatId }[] = [
   { label: "LSAT", topic: "lsat" },
 ];
 
+// 히어로 문장의 빈 칩(아직 아무것도 안 고른 상태)에서 살짝 도는 예시 값들.
+// 드롭다운이 닫혀 있고 그 항목을 아직 아무것도 안 골랐을 때만 돌고,
+// 열리거나 선택되는 즉시 실제 값 표시로 멈춘다.
+const TOPIC_SAMPLES = [
+  "MCAT",
+  "LSAT",
+  "Software Engineering",
+  "Management Consulting",
+  "Product Management",
+  "Public Policy",
+];
+const FORMAT_SAMPLES = FORMATS.map((f) => f.label.toLowerCase());
+const TIME_SAMPLES = DAYPARTS.map((d) => d.label.toLowerCase());
+const CYCLE_INTERVAL_MS = 2200;
+const CYCLE_FADE_MS = 180;
+
 export function SentenceBuilder() {
   const router = useRouter();
   const [draft, setDraft] = useState<SearchQuery>(EMPTY_QUERY);
@@ -50,6 +67,34 @@ export function SentenceBuilder() {
   }, []);
 
   const { counts, total, loading } = useRoomCounts(draft);
+
+  const sub = getSubcategory(draft.subcategoryId);
+
+  // 아직 아무것도 안 고르고, 드롭다운도 닫혀 있는 칩만 실시간으로 예시 값을 돌린다.
+  const topicLocked = Boolean(sub) || open === "topic";
+  const formatLocked = draft.format !== null || open === "format";
+  const timeLocked = draft.weekday !== null || draft.daypart !== null || open === "time";
+
+  const [cycleTick, setCycleTick] = useState(0);
+  const [cycleFading, setCycleFading] = useState(false);
+
+  // 이동/스케일 같은 "동작"은 없고 텍스트 교체 + 옅은 opacity 딤(0.35)뿐이라
+  // OS의 "동작 줄이기"가 켜져 있어도 순환 자체는 계속 돌린다 (내용이 멈추면 안 되니까).
+  useEffect(() => {
+    if (topicLocked && formatLocked && timeLocked) return;
+    const timer = window.setInterval(() => {
+      setCycleFading(true);
+      window.setTimeout(() => {
+        setCycleTick((n) => n + 1);
+        setCycleFading(false);
+      }, CYCLE_FADE_MS);
+    }, CYCLE_INTERVAL_MS);
+    return () => window.clearInterval(timer);
+  }, [topicLocked, formatLocked, timeLocked]);
+
+  const topicDisplay = topicLocked ? topicLabel(draft) : TOPIC_SAMPLES[cycleTick % TOPIC_SAMPLES.length];
+  const formatDisplay = formatLocked ? formatLabel(draft) : FORMAT_SAMPLES[cycleTick % FORMAT_SAMPLES.length];
+  const timeDisplay = timeLocked ? timeLabel(draft) : TIME_SAMPLES[cycleTick % TIME_SAMPLES.length];
 
   const timeZone = useMemo(() => {
     try {
@@ -82,7 +127,6 @@ export function SentenceBuilder() {
     setDraft((d) => ({ ...d, weekday: next.weekday, daypart: next.daypart }));
   }
 
-  const sub = getSubcategory(draft.subcategoryId);
   const resultHint =
     total === null
       ? null
@@ -129,22 +173,38 @@ export function SentenceBuilder() {
           }}
         >
           <span>I want to get better at</span>
-          <Chip
-            label={topicLabel(draft)}
-            filled={Boolean(sub)}
-            open={open === "topic"}
-            onClick={() => setOpen(open === "topic" ? null : "topic")}
-            ariaLabel={`Topic: ${topicLabel(draft)}. Click to change.`}
-          />
+          <span
+            style={{
+              display: "inline-flex",
+              opacity: !topicLocked && cycleFading ? 0.35 : 1,
+              transition: "opacity 180ms ease",
+            }}
+          >
+            <Chip
+              label={topicDisplay}
+              filled
+              open={open === "topic"}
+              onClick={() => setOpen(open === "topic" ? null : "topic")}
+              ariaLabel={`Topic: ${topicLabel(draft)}. Click to change.`}
+            />
+          </span>
           <span>through</span>
           <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
-            <Chip
-              label={formatLabel(draft)}
-              filled={draft.format !== null}
-              open={open === "format"}
-              onClick={() => setOpen(open === "format" ? null : "format")}
-              ariaLabel={`Format: ${formatLabel(draft)}. Click to change.`}
-            />
+            <span
+              style={{
+                display: "inline-flex",
+                opacity: !formatLocked && cycleFading ? 0.35 : 1,
+                transition: "opacity 180ms ease",
+              }}
+            >
+              <Chip
+                label={formatDisplay}
+                filled
+                open={open === "format"}
+                onClick={() => setOpen(open === "format" ? null : "format")}
+                ariaLabel={`Format: ${formatLabel(draft)}. Click to change.`}
+              />
+            </span>
             <FormatPicker
               open={open === "format"}
               onClose={() => setOpen(null)}
@@ -155,13 +215,21 @@ export function SentenceBuilder() {
           </div>
           <span>meeting</span>
           <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
-            <Chip
-              label={timeLabel(draft)}
-              filled={draft.weekday !== null || draft.daypart !== null}
-              open={open === "time"}
-              onClick={() => setOpen(open === "time" ? null : "time")}
-              ariaLabel={`Time: ${timeLabel(draft)}. Click to change.`}
-            />
+            <span
+              style={{
+                display: "inline-flex",
+                opacity: !timeLocked && cycleFading ? 0.35 : 1,
+                transition: "opacity 180ms ease",
+              }}
+            >
+              <Chip
+                label={timeDisplay}
+                filled
+                open={open === "time"}
+                onClick={() => setOpen(open === "time" ? null : "time")}
+                ariaLabel={`Time: ${timeLabel(draft)}. Click to change.`}
+              />
+            </span>
             <TimePicker
               open={open === "time"}
               onClose={() => setOpen(null)}
@@ -200,6 +268,7 @@ export function SentenceBuilder() {
           <button
             type="button"
             onClick={() => go(draft)}
+            className="rt-btn-primary"
             style={{
               ...primaryButton,
               padding: isMobile ? "14px 24px" : "16px 34px",
@@ -212,6 +281,7 @@ export function SentenceBuilder() {
             Show me the rooms
           </button>
           <span
+            className="rt-tnum"
             style={{
               fontFamily: font.ui,
               fontSize: isMobile ? 13 : 14.5,
