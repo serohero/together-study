@@ -27,7 +27,7 @@ export function LiveStrip() {
   return (
     <section
       style={{
-        padding: isMobile ? "40px 16px 48px" : "68px 56px 60px",
+        padding: isMobile ? "112px 16px 48px" : "68px 56px 60px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -111,10 +111,8 @@ export function LiveStrip() {
           style={{
             display: "grid",
             // 모바일 폭에서는 최소 160px~1fr로 감싸서 1~2열, PC에서는 4열로 자연스럽게 전환
-            gridTemplateColumns: isMobile
-              ? "repeat(auto-fill, minmax(150px, 1fr))"
-              : "repeat(4, minmax(0, 1fr))",
-            gap: isMobile ? 20 : 34,
+            gridTemplateColumns: isMobile ? "1fr" : "repeat(2, minmax(0, 1fr))",
+            gap: isMobile ? 12 : 16,
             minHeight: 68,
             boxSizing: "border-box",
           }}
@@ -122,11 +120,18 @@ export function LiveStrip() {
           {(data?.rooms ?? []).map((r) => (
             <div
               key={r.id}
+              className="rt-room-card"
               style={{
                 display: "flex",
                 flexDirection: "column",
                 gap: 5,
                 minWidth: 0, // 텍스트 말줄임 및 줄바꿈 보장
+                background: c.card,
+                border: `1px solid ${c.hair}`,
+                borderRadius: 14,
+                padding: "20px 22px",
+                boxShadow: "0 1px 2px rgba(16,22,19,0.04)",
+                boxSizing: "border-box",
               }}
             >
               <span

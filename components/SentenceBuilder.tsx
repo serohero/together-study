@@ -24,18 +24,9 @@ import type {
   Subcategory,
   Weekday,
 } from "@/lib/types";
-import { c, font, primaryButton, resetButton, CONTENT_WIDTH } from "./tokens";
+import { c, font, primaryButton, CONTENT_WIDTH } from "./tokens";
 
 type OpenPicker = "topic" | "format" | "time" | null;
-
-const QUICK_PICKS: { label: string; topic: string; format?: FormatId }[] = [
-  { label: "MCAT", topic: "mcat" },
-  { label: "Case interviews", topic: "management-consulting", format: "interview" },
-  { label: "System design", topic: "software-engineering", format: "interview" },
-  { label: "Korean", topic: "korean" },
-  { label: "Morning writing", topic: "publishing-and-writing", format: "study" },
-  { label: "LSAT", topic: "lsat" },
-];
 
 // 히어로 문장의 빈 칩(아직 아무것도 안 고른 상태)에서 살짝 도는 예시 값들.
 // 드롭다운이 닫혀 있고 그 항목을 아직 아무것도 안 골랐을 때만 돌고,
@@ -137,7 +128,9 @@ export function SentenceBuilder() {
   return (
     <section
       style={{
-        padding: "clamp(36px, 7vw, 92px) clamp(16px, 4vw, 56px) 0",
+        padding: isMobile
+          ? "128px clamp(16px, 4vw, 56px) 0"
+          : "clamp(52px, 9vw, 108px) clamp(16px, 4vw, 56px) 0",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -151,7 +144,7 @@ export function SentenceBuilder() {
           maxWidth: CONTENT_WIDTH - 100,
           display: "flex",
           flexDirection: "column",
-          gap: isMobile ? 32 : 44,
+          gap: isMobile ? 40 : 68,
           boxSizing: "border-box",
         }}
       >
@@ -167,6 +160,7 @@ export function SentenceBuilder() {
             display: "flex",
             flexWrap: "wrap",
             alignItems: "center",
+            justifyContent: isMobile ? "center" : "flex-start",
             gap: "8px 10px",
             width: "100%",
             boxSizing: "border-box",
@@ -258,9 +252,9 @@ export function SentenceBuilder() {
         <div
           style={{
             display: "flex",
-            alignItems: isMobile ? "flex-start" : "center",
+            alignItems: "center",
             flexDirection: isMobile ? "column" : "row",
-            gap: isMobile ? 12 : 22,
+            gap: isMobile ? 14 : 22,
             width: "100%",
             boxSizing: "border-box",
           }}
@@ -271,9 +265,9 @@ export function SentenceBuilder() {
             className="rt-btn-primary"
             style={{
               ...primaryButton,
-              padding: isMobile ? "14px 24px" : "16px 34px",
+              padding: isMobile ? "12px 28px" : "16px 34px",
               fontSize: isMobile ? 15 : 16.5,
-              width: isMobile ? "100%" : "auto",
+              width: "auto",
               textAlign: "center",
               boxSizing: "border-box",
             }}
@@ -291,60 +285,6 @@ export function SentenceBuilder() {
           >
             {resultHint ?? "Free · no account needed to look"}
           </span>
-        </div>
-
-        {/* ---------------- 빠른 진입 ---------------- */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: isMobile ? "10px 12px" : 14,
-            flexWrap: "wrap",
-            paddingTop: 8,
-            width: "100%",
-            boxSizing: "border-box",
-          }}
-        >
-          <span
-            style={{
-              fontFamily: font.mono,
-              fontSize: 10.5,
-              letterSpacing: "0.14em",
-              color: c.ink3,
-              width: isMobile ? "100%" : "auto",
-              marginBottom: isMobile ? 2 : 0,
-            }}
-          >
-            BUSY THIS WEEK
-          </span>
-          {QUICK_PICKS.map((q) => {
-            const target = getSubcategory(q.topic);
-            if (!target) return null;
-            return (
-              <button
-                key={q.label}
-                type="button"
-                onClick={() =>
-                  go({
-                    ...EMPTY_QUERY,
-                    subcategoryId: target.id,
-                    categoryId: target.categoryId,
-                    format: q.format ?? null,
-                  })
-                }
-                style={{
-                  ...resetButton,
-                  fontFamily: font.ui,
-                  fontSize: isMobile ? 13.5 : 14.5,
-                  color: c.ink,
-                  borderBottom: "1px solid #DDE3DC",
-                  paddingBottom: 2,
-                }}
-              >
-                {q.label}
-              </button>
-            );
-          })}
         </div>
       </div>
     </section>
