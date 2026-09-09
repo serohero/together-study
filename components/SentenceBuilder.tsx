@@ -41,7 +41,7 @@ const TOPIC_SAMPLES = [
 ];
 const FORMAT_SAMPLES = FORMATS.map((f) => f.label.toLowerCase());
 const TIME_SAMPLES = DAYPARTS.map((d) => d.label.toLowerCase());
-const CYCLE_INTERVAL_MS = 2200;
+const CYCLE_INTERVAL_MS = 3000;
 const CYCLE_FADE_MS = 180;
 
 export function SentenceBuilder() {
@@ -160,7 +160,6 @@ export function SentenceBuilder() {
             display: "flex",
             flexWrap: "wrap",
             alignItems: "center",
-            justifyContent: isMobile ? "center" : "flex-start",
             gap: "8px 10px",
             width: "100%",
             boxSizing: "border-box",
@@ -182,6 +181,7 @@ export function SentenceBuilder() {
               ariaLabel={`Topic: ${topicLabel(draft)}. Click to change.`}
             />
           </span>
+          {isMobile && <div style={{ flexBasis: "100%", height: 0 }} />}
           <span>through</span>
           <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
             <span
@@ -208,6 +208,7 @@ export function SentenceBuilder() {
             />
           </div>
           <span>meeting</span>
+          {isMobile && <div style={{ flexBasis: "100%", height: 0 }} />}
           <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
             <span
               style={{
@@ -252,7 +253,7 @@ export function SentenceBuilder() {
         <div
           style={{
             display: "flex",
-            alignItems: "center",
+            alignItems: isMobile ? "flex-start" : "center",
             flexDirection: isMobile ? "column" : "row",
             gap: isMobile ? 14 : 22,
             width: "100%",

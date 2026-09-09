@@ -37,23 +37,25 @@ export const Chip = forwardRef<HTMLButtonElement, ChipProps>(function Chip(
         ...resetButton,
         display: "inline-flex",
         alignItems: hero ? "baseline" : "center",
-        gap: hero ? 10 : 8,
+        // hero 칩은 문장의 clamp() 폰트 사이즈를 그대로 상속하니, gap/padding도
+        // em 단위로 둬서 모바일에서 글씨가 작아질 때 박스가 같이 비례해서 줄어들게 한다.
+        gap: hero ? "0.26em" : 8,
         background: open ? c.accent : bg,
         color: open ? "#FFFFFF" : fg,
         borderRadius: hero ? 6 : 7,
-        padding: hero ? "1px 14px 4px" : "9px 16px",
+        padding: hero ? "0.15em 0.38em 0.15em" : "9px 16px",
         margin: hero ? "0 4px" : 0,
         fontFamily: hero ? font.display : font.ui,
         fontWeight: 600,
         fontSize: hero ? "inherit" : 16,
-        lineHeight: hero ? 1.18 : 1.2,
+        lineHeight: hero ? 1.3 : 1.2,
         transition: "background 140ms ease, color 140ms ease",
       }}
     >
       {label}
       <svg
-        width={hero ? 14 : 13}
-        height={hero ? 14 : 13}
+        width={hero ? undefined : 13}
+        height={hero ? undefined : 13}
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -62,6 +64,9 @@ export const Chip = forwardRef<HTMLButtonElement, ChipProps>(function Chip(
         strokeLinejoin="round"
         aria-hidden="true"
         style={{
+          width: hero ? "0.32em" : undefined,
+          height: hero ? "0.32em" : undefined,
+          flexShrink: 0,
           alignSelf: "center",
           transform: open ? "rotate(180deg)" : "none",
           transition: "transform 140ms ease",
