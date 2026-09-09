@@ -181,7 +181,6 @@ export function SentenceBuilder() {
               ariaLabel={`Topic: ${topicLabel(draft)}. Click to change.`}
             />
           </span>
-          {isMobile && <div style={{ flexBasis: "100%", height: 0 }} />}
           <span>through</span>
           <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
             <span
@@ -208,7 +207,6 @@ export function SentenceBuilder() {
             />
           </div>
           <span>meeting</span>
-          {isMobile && <div style={{ flexBasis: "100%", height: 0 }} />}
           <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
             <span
               style={{
