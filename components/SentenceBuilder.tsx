@@ -163,6 +163,7 @@ export function SentenceBuilder() {
             display: "flex",
             flexWrap: "wrap",
             alignItems: "center",
+            justifyContent: isMobile ? "center" : "flex-start",
             gap: "8px 10px",
             width: "100%",
             boxSizing: "border-box",
@@ -259,7 +260,7 @@ export function SentenceBuilder() {
         <div
           style={{
             display: "flex",
-            alignItems: isMobile ? "flex-start" : "center",
+            alignItems: "center",
             flexDirection: isMobile ? "column" : "row",
             gap: isMobile ? 14 : 22,
             width: "100%",
@@ -288,6 +289,7 @@ export function SentenceBuilder() {
               fontSize: isMobile ? 13 : 14.5,
               color: c.ink3,
               lineHeight: 1.4,
+              textAlign: isMobile ? "center" : "left",
             }}
           >
             {resultHint ?? "Free · no account needed to look"}
