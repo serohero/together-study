@@ -160,7 +160,9 @@ export function SiteHeader({ compact = false }: { compact?: boolean }) {
         </Link>
 
         <Link
-          href="/how-it-works"
+          // TODO: /how-it-works 페이지 생기면 다시 원래 링크로 되돌리기.
+          // 지금은 페이지가 없어서 임시로 study_room 데모 화면으로 보냄.
+          href="/study_room"
           prefetch={false}
           className="rt-nav-link"
           style={{ color: c.ink2, textDecoration: "none", fontFamily: font.ui, fontSize: isMobile ? 13.5 : 14.5 }}
