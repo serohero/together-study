@@ -31,13 +31,15 @@ type OpenPicker = "topic" | "format" | "time" | null;
 // 히어로 문장의 빈 칩(아직 아무것도 안 고른 상태)에서 살짝 도는 예시 값들.
 // 드롭다운이 닫혀 있고 그 항목을 아직 아무것도 안 골랐을 때만 돌고,
 // 열리거나 선택되는 즉시 실제 값 표시로 멈춘다.
+// 순환 애니메이션용 예시값은 일부러 짧은 것만 골랐다 — 실제 선택값은 길어도 상관없지만,
+// 계속 자동으로 바뀌는 예시가 길면 애니메이션 도는 동안 줄바꿈이 들쑥날쑥해서 어수선해 보인다.
 const TOPIC_SAMPLES = [
   "MCAT",
   "LSAT",
-  "Software Engineering",
-  "Management Consulting",
-  "Product Management",
-  "Public Policy",
+  "MBA",
+  "Marketing",
+  "Accounting",
+  "Real Estate",
 ];
 const FORMAT_SAMPLES = FORMATS.map((f) => f.label.toLowerCase());
 const TIME_SAMPLES = DAYPARTS.map((d) => d.label.toLowerCase());
