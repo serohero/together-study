@@ -27,7 +27,7 @@ export function LiveStrip() {
   return (
     <section
       style={{
-        padding: isMobile ? "112px 16px 48px" : "68px 56px 60px",
+        padding: isMobile ? "136px 16px 48px" : "92px 56px 60px",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
