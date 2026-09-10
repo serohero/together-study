@@ -44,16 +44,6 @@ const TIME_SAMPLES = DAYPARTS.map((d) => d.label.toLowerCase());
 const CYCLE_INTERVAL_MS = 3000;
 const CYCLE_FADE_MS = 180;
 
-// 모바일에서 "I want to get better at [토픽칩]"이 항상 한 줄에 들어가도록,
-// 토픽 값이 길어질수록 칩 폰트 크기를 줄인다 (through가 항상 2번째 줄에 오게 하기 위함).
-// 8자까지는 원래 크기, 그 이후로는 글자당 조금씩 줄이고 0.56배 밑으로는 안 내려간다 (가독성 최소선).
-function topicChipFontScale(text: string): number {
-  const BASE_LEN = 8;
-  const MIN_SCALE = 0.56;
-  if (text.length <= BASE_LEN) return 1;
-  const scale = 1 - (text.length - BASE_LEN) * 0.028;
-  return Math.max(MIN_SCALE, scale);
-}
 
 export function SentenceBuilder() {
   const router = useRouter();
@@ -97,7 +87,6 @@ export function SentenceBuilder() {
   const topicDisplay = topicLocked ? topicLabel(draft) : TOPIC_SAMPLES[cycleTick % TOPIC_SAMPLES.length];
   const formatDisplay = formatLocked ? formatLabel(draft) : FORMAT_SAMPLES[cycleTick % FORMAT_SAMPLES.length];
   const timeDisplay = timeLocked ? timeLabel(draft) : TIME_SAMPLES[cycleTick % TIME_SAMPLES.length];
-  const topicChipScale = isMobile ? topicChipFontScale(topicDisplay) : 1;
 
   const timeZone = useMemo(() => {
     try {
@@ -184,7 +173,6 @@ export function SentenceBuilder() {
               opacity: !topicLocked && cycleFading ? 0.35 : 1,
               transition: "opacity 180ms ease",
               transform: "translateZ(0)",
-              fontSize: topicChipScale !== 1 ? `${topicChipScale}em` : undefined,
             }}
           >
             <Chip
@@ -195,7 +183,6 @@ export function SentenceBuilder() {
               ariaLabel={`Topic: ${topicLabel(draft)}. Click to change.`}
             />
           </span>
-          {isMobile && <div style={{ flexBasis: "100%", height: 0 }} />}
           <span>through</span>
           <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
             <span
@@ -223,7 +210,6 @@ export function SentenceBuilder() {
             />
           </div>
           <span>meeting</span>
-          {isMobile && <div style={{ flexBasis: "100%", height: 0 }} />}
           <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
             <span
               style={{
