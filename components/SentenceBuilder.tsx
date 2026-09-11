@@ -8,7 +8,7 @@ import { TopicPicker } from "./TopicPicker";
 import { FormatPicker } from "./FormatPicker";
 import { TimePicker } from "./TimePicker";
 import { useRoomCounts } from "@/hooks/useRoomData";
-import { getSubcategory } from "@/lib/taxonomy";
+import { useFormats } from "@/hooks/useFormats";
 import {
   EMPTY_QUERY,
   formatLabel,
@@ -16,7 +16,7 @@ import {
   timeLabel,
   topicLabel,
 } from "@/lib/query";
-import { FORMATS, DAYPARTS } from "@/lib/types";
+import { DAYPARTS } from "@/lib/types";
 import type {
   DaypartId,
   FormatId,
@@ -41,7 +41,15 @@ const TOPIC_SAMPLES = [
   "Accounting",
   "Real Estate",
 ];
-const FORMAT_SAMPLES = FORMATS.map((f) => f.label.toLowerCase());
+// 실제 study_types가 아직 로딩 중일 때 잠깐 쓰는 대체 값 (cycleTick % 0 방지용).
+// 포맷 목록 자체는 useFormats() 훅으로 real DB에서 불러온다.
+const FALLBACK_FORMAT_SAMPLES = [
+  "test prep",
+  "interview prep",
+  "project",
+  "study",
+  "discussion",
+];
 const TIME_SAMPLES = DAYPARTS.map((d) => d.label.toLowerCase());
 const CYCLE_INTERVAL_MS = 3000;
 const CYCLE_FADE_MS = 180;
@@ -61,11 +69,19 @@ export function SentenceBuilder() {
   }, []);
 
   const { counts, total, loading } = useRoomCounts(draft);
-
-  const sub = getSubcategory(draft.subcategoryId);
+  const { formats } = useFormats();
+  const formatSamples = useMemo(
+    () =>
+      formats.length > 0
+        ? formats.map((f) => f.label.toLowerCase())
+        : FALLBACK_FORMAT_SAMPLES,
+    [formats]
+  );
 
   // 아직 아무것도 안 고르고, 드롭다운도 닫혀 있는 칩만 실시간으로 예시 값을 돌린다.
-  const topicLocked = Boolean(sub) || open === "topic";
+  // subcategoryId 자체가 real categories 테이블의 layer_2 텍스트(=라벨)라
+  // 값이 있으면 곧 골랐다는 뜻이다 (따로 조회할 필요 없음).
+  const topicLocked = Boolean(draft.subcategoryId) || open === "topic";
   const formatLocked = draft.format !== null || open === "format";
   const timeLocked = draft.weekday !== null || draft.daypart !== null || open === "time";
 
@@ -87,7 +103,7 @@ export function SentenceBuilder() {
   }, [topicLocked, formatLocked, timeLocked]);
 
   const topicDisplay = topicLocked ? topicLabel(draft) : TOPIC_SAMPLES[cycleTick % TOPIC_SAMPLES.length];
-  const formatDisplay = formatLocked ? formatLabel(draft) : FORMAT_SAMPLES[cycleTick % FORMAT_SAMPLES.length];
+  const formatDisplay = formatLocked ? formatLabel(draft) : formatSamples[cycleTick % formatSamples.length];
   const timeDisplay = timeLocked ? timeLabel(draft) : TIME_SAMPLES[cycleTick % TIME_SAMPLES.length];
 
   const timeZone = useMemo(() => {
@@ -211,6 +227,7 @@ export function SentenceBuilder() {
               onPick={pickFormat}
               selected={draft.format}
               counts={counts}
+              isMobile={isMobile}
             />
           </div>
           <span>meeting</span>
@@ -239,6 +256,7 @@ export function SentenceBuilder() {
               daypart={draft.daypart}
               onChange={pickTime}
               timeZone={timeZone}
+              isMobile={isMobile}
             />
           </div>
           <span>every week.</span>
@@ -253,6 +271,7 @@ export function SentenceBuilder() {
             selectedId={draft.subcategoryId}
             counts={counts}
             loading={loading}
+            isMobile={isMobile}
           />
         )}
 

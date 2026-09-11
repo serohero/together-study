@@ -1,12 +1,13 @@
 // src/components/TopicPicker.tsx
-// 주제 피커. 왼쪽에 카테고리 7개, 오른쪽에 그 카테고리의 서브카테고리.
-// 검색어를 치면 전체 84개에서 바로 찾습니다.
+// 주제 피커. 왼쪽에 카테고리, 오른쪽에 그 카테고리의 서브카테고리.
+// 검색어를 치면 전체 토픽에서 바로 찾습니다.
+// 목록은 real `categories` 테이블(layer_1/layer_2)에서 불러옵니다 — useCategories 훅.
 // 숫자는 지금 고른 포맷·시간 기준으로 서버에서 다시 계산된 값입니다.
 
 "use client";
 
-import { useMemo, useState } from "react";
-import { CATEGORIES, searchSubcategories } from "@/lib/taxonomy";
+import { useEffect, useMemo, useState } from "react";
+import { useCategories } from "@/hooks/useCategories";
 import type { Subcategory, TaxonomyCounts } from "@/lib/types";
 import { useDismissable } from "@/hooks/useDismissable";
 import { c, font, label as labelStyle, resetButton, shadow } from "./tokens";
@@ -18,6 +19,7 @@ interface Props {
   selectedId: string | null;
   counts: TaxonomyCounts | null;
   loading: boolean;
+  isMobile?: boolean;
 }
 
 export function TopicPicker({
@@ -27,21 +29,46 @@ export function TopicPicker({
   selectedId,
   counts,
   loading,
+  isMobile = false,
 }: Props) {
-  const [activeCategoryId, setActiveCategoryId] = useState<string>(() => {
-    const owner = CATEGORIES.find((cat) =>
-      cat.subcategories.some((s) => s.id === selectedId)
-    );
-    return owner ? owner.id : CATEGORIES[0].id;
-  });
+  const { categories, loading: categoriesLoading } = useCategories();
+  const [activeCategoryId, setActiveCategoryId] = useState<string>("");
   const [term, setTerm] = useState("");
 
   const ref = useDismissable<HTMLDivElement>(open, onClose, { focusOnOpen: true });
 
+  // 카테고리 목록이 (비동기로) 도착하면 그때 활성 카테고리를 정한다.
+  useEffect(() => {
+    if (categories.length === 0) return;
+    setActiveCategoryId((current) => {
+      if (current && categories.some((cat) => cat.id === current)) return current;
+      const owner = categories.find((cat) =>
+        cat.subcategories.some((s) => s.id === selectedId)
+      );
+      return owner ? owner.id : categories[0].id;
+    });
+  }, [categories, selectedId]);
+
   const searching = term.trim().length > 0;
-  const results = useMemo(() => searchSubcategories(term), [term]);
+  const allSubcategories = useMemo(
+    () => categories.flatMap((cat) => cat.subcategories),
+    [categories]
+  );
+  const results = useMemo(() => {
+    const q = term.trim().toLowerCase();
+    if (!q) return [];
+    return allSubcategories
+      .filter((s) => {
+        const owner = categories.find((cat) => cat.id === s.categoryId);
+        return (
+          s.label.toLowerCase().includes(q) ||
+          (owner ? owner.label.toLowerCase().includes(q) : false)
+        );
+      })
+      .slice(0, 40);
+  }, [term, allSubcategories, categories]);
   const activeCategory =
-    CATEGORIES.find((x) => x.id === activeCategoryId) ?? CATEGORIES[0];
+    categories.find((x) => x.id === activeCategoryId) ?? categories[0] ?? null;
 
   if (!open) return null;
 
@@ -66,7 +93,7 @@ export function TopicPicker({
         width: "100%",
       }}
     >
-      {/* 검색 — 84개를 다 클릭하지 않아도 되게 하는 탈출구 */}
+      {/* 검색 — 목록을 다 클릭하지 않아도 되게 하는 탈출구 */}
       <div
         style={{
           display: "flex",
@@ -134,16 +161,16 @@ export function TopicPicker({
                 color: c.ink3,
               }}
             >
-              Nothing matches “{term}”. Roundtable covers 84 topics — try a broader
-              word, or tell us what is missing.
+              Nothing matches “{term}”. Try a broader word, or tell us what is
+              missing.
             </p>
           ) : (
             results.map((s) => {
               const n = countFor(s.id);
-              const owner = CATEGORIES.find((x) => x.id === s.categoryId);
+              const owner = categories.find((x) => x.id === s.categoryId);
               return (
                 <button
-                  key={s.id}
+                  key={`${s.categoryId}::${s.id}`}
                   type="button"
                   onClick={() => pick(s)}
                   style={{
@@ -175,19 +202,50 @@ export function TopicPicker({
             })
           )}
         </div>
+      ) : categories.length === 0 || !activeCategory ? (
+        <div
+          style={{
+            padding: "36px 22px",
+            fontFamily: font.ui,
+            fontSize: 14.5,
+            color: c.ink3,
+          }}
+        >
+          {categoriesLoading ? "Loading topics…" : "Couldn’t load topics right now."}
+        </div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "268px minmax(0, 1fr)" }}>
-          {/* 카테고리 7개 */}
+        <div
+          style={
+            isMobile
+              ? { display: "flex", flexDirection: "column", maxHeight: "70vh" }
+              : { display: "grid", gridTemplateColumns: "268px minmax(0, 1fr)" }
+          }
+        >
+          {/* 카테고리 7개 — 모바일에서는 가로 스크롤 칩으로 */}
           <div
-            style={{
-              borderRight: `1px solid ${c.hairSoft}`,
-              padding: "14px 12px 18px",
-            }}
+            style={
+              isMobile
+                ? {
+                    display: "flex",
+                    gap: 8,
+                    overflowX: "auto",
+                    padding: "12px 16px",
+                    borderBottom: `1px solid ${c.hairSoft}`,
+                    flexShrink: 0,
+                    WebkitOverflowScrolling: "touch",
+                  }
+                : {
+                    borderRight: `1px solid ${c.hairSoft}`,
+                    padding: "14px 12px 18px",
+                  }
+            }
           >
-            <span style={{ ...labelStyle, display: "block", padding: "6px 14px 10px" }}>
-              Field
-            </span>
-            {CATEGORIES.map((cat) => {
+            {!isMobile && (
+              <span style={{ ...labelStyle, display: "block", padding: "6px 14px 10px" }}>
+                Field
+              </span>
+            )}
+            {categories.map((cat) => {
               const active = cat.id === activeCategory.id;
               return (
                 <button
@@ -197,22 +255,36 @@ export function TopicPicker({
                   onFocus={() => setActiveCategoryId(cat.id)}
                   onClick={() => setActiveCategoryId(cat.id)}
                   aria-current={active}
-                  style={{
-                    ...resetButton,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    width: "100%",
-                    padding: "11px 14px",
-                    borderRadius: 7,
-                    marginBottom: 1,
-                    background: active ? c.accentTint2 : "transparent",
-                  }}
+                  style={
+                    isMobile
+                      ? {
+                          ...resetButton,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6,
+                          padding: "8px 13px",
+                          borderRadius: 999,
+                          whiteSpace: "nowrap",
+                          flexShrink: 0,
+                          background: active ? c.accentTint2 : c.neutralTint,
+                        }
+                      : {
+                          ...resetButton,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          width: "100%",
+                          padding: "11px 14px",
+                          borderRadius: 7,
+                          marginBottom: 1,
+                          background: active ? c.accentTint2 : "transparent",
+                        }
+                  }
                 >
                   <span
                     style={{
                       fontFamily: font.ui,
-                      fontSize: 15,
+                      fontSize: isMobile ? 13.5 : 15,
                       color: c.ink,
                       fontWeight: active ? 600 : 400,
                     }}
@@ -234,14 +306,20 @@ export function TopicPicker({
           </div>
 
           {/* 서브카테고리 */}
-          <div style={{ padding: "14px 22px 18px" }}>
+          <div
+            style={
+              isMobile
+                ? { padding: "12px 16px 18px", overflowY: "auto" }
+                : { padding: "14px 22px 18px" }
+            }
+          >
             <span style={{ ...labelStyle, display: "block", padding: "6px 12px 10px" }}>
               {activeCategory.label} — {activeCategory.subcategories.length} topics
             </span>
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                gridTemplateColumns: isMobile ? "1fr" : "repeat(2, minmax(0, 1fr))",
                 gap: "0 20px",
               }}
             >
@@ -250,7 +328,7 @@ export function TopicPicker({
                 const selected = s.id === selectedId;
                 return (
                   <button
-                    key={s.id}
+                    key={`${s.categoryId}::${s.id}`}
                     type="button"
                     onClick={() => pick(s)}
                     style={{

@@ -16,6 +16,7 @@ interface Props {
   onChange: (next: { weekday: Weekday | null; daypart: DaypartId | null }) => void;
   /** 브라우저에서 읽은 타임존 이름. 표시용입니다. */
   timeZone: string;
+  isMobile?: boolean;
 }
 
 export function TimePicker({
@@ -25,27 +26,57 @@ export function TimePicker({
   daypart,
   onChange,
   timeZone,
+  isMobile = false,
 }: Props) {
   const ref = useDismissable<HTMLDivElement>(open, onClose, { focusOnOpen: true });
   if (!open) return null;
 
   return (
-    <div
-      ref={ref}
-      role="dialog"
-      aria-label="Pick a time"
-      style={{
-        position: "absolute",
-        zIndex: 40,
-        top: "calc(100% + 10px)",
-        left: 0,
-        width: 372,
-        background: c.card,
-        borderRadius: 11,
-        boxShadow: shadow.popover,
-        padding: "14px 16px 16px",
-      }}
-    >
+    <>
+      {isMobile && (
+        <div
+          onClick={onClose}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(20, 24, 21, 0.28)",
+            zIndex: 45,
+          }}
+        />
+      )}
+      <div
+        ref={ref}
+        role="dialog"
+        aria-label="Pick a time"
+        style={
+          isMobile
+            ? {
+                position: "fixed",
+                zIndex: 46,
+                left: 16,
+                right: 16,
+                top: "50%",
+                transform: "translateY(-50%)",
+                maxHeight: "76vh",
+                overflowY: "auto",
+                background: c.card,
+                borderRadius: 11,
+                boxShadow: shadow.popover,
+                padding: "14px 16px 16px",
+              }
+            : {
+                position: "absolute",
+                zIndex: 40,
+                top: "calc(100% + 10px)",
+                left: 0,
+                width: 372,
+                background: c.card,
+                borderRadius: 11,
+                boxShadow: shadow.popover,
+                padding: "14px 16px 16px",
+              }
+        }
+      >
       <div
         style={{
           display: "flex",
@@ -146,6 +177,7 @@ export function TimePicker({
           Any time works for me
         </button>
       )}
-    </div>
+      </div>
+    </>
   );
 }
