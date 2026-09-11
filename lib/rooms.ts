@@ -252,30 +252,25 @@ function mockLiveFallbackCount(now: Date): number {
 
 export function listLiveRooms(limit = 4, now = new Date()): Room[] {
   const live = ROOMS.filter((r) => isLive(r, now));
-  if (live.length >= limit) {
+  if (live.length > 0) {
+    // 진짜 진행 중인 방이 있으면 그만큼만 보여줍니다 — liveRoomCount()가
+    // 보고하는 숫자(real 개수)랑 카드 개수가 항상 같아야 하니, 여기서
+    // 가짜 필러로 4개까지 채우지 않습니다. (많으면 limit까지만 자릅니다 —
+    // "See what's on" 링크로 나머지를 보면 되니까요.)
     return live
       .sort((a, b) => minutesIn(b, now) - minutesIn(a, now))
       .slice(0, limit)
       .map((r) => ({ ...r, liveSince: now.toISOString() }));
   }
-  if (live.length === 0) {
-    // liveRoomCount()랑 같은 기준으로 1~2개만 채웁니다 — 문구랑 카드 개수가
-    // 안 맞으면 어색하니까요.
-    const fallbackCount = mockLiveFallbackCount(now);
-    return ROOMS.filter((r) => r.weekCurrent > 0)
-      .slice(0, fallbackCount)
-      .map((r, i) => ({
-        ...r,
-        liveSince: new Date(now.getTime() - (8 + i * 11) * 60000).toISOString(),
-      }));
-  }
-  const filler = ROOMS.filter((r) => r.weekCurrent > 0 && !live.includes(r))
-    .slice(0, limit - live.length)
+  // 진짜 진행 중인 방이 0개일 때만 liveRoomCount()와 같은 기준으로
+  // 1~2개를 데모용으로 채웁니다.
+  const fallbackCount = mockLiveFallbackCount(now);
+  return ROOMS.filter((r) => r.weekCurrent > 0)
+    .slice(0, fallbackCount)
     .map((r, i) => ({
       ...r,
       liveSince: new Date(now.getTime() - (8 + i * 11) * 60000).toISOString(),
     }));
-  return [...live.map((r) => ({ ...r, liveSince: now.toISOString() })), ...filler];
 }
 
 export function liveRoomCount(now = new Date()): number {
