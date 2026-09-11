@@ -1,8 +1,9 @@
 // src/app/explore/page.tsx
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { SiteHeader } from "@/components/SiteHeader";
 import { StudyRoomCard } from "@/components/StudyRoomCard";
 import { supabase } from "@/lib/supabase";
@@ -129,12 +130,19 @@ function FilterDropdown({
   );
 }
 
-export default function ExplorePage() {
+function ExplorePageInner() {
+  const searchParams = useSearchParams();
   const [rooms, setRooms] = useState<StudyRoomRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [industryFilter, setIndustryFilter] = useState<string | null>(null);
-  const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  // 홈 화면에서 넘어온 필터를 그대로 이어받는다.
+  // topic(=layer_2, 더 구체적인 값)이 있으면 우선, 없으면 field(=layer_1).
+  const [industryFilter, setIndustryFilter] = useState<string | null>(
+    () => searchParams.get("topic") || searchParams.get("field") || null
+  );
+  const [typeFilter, setTypeFilter] = useState<string | null>(() =>
+    searchParams.get("format")
+  );
   const [isMobile, setIsMobile] = useState(false);
 
   // 모바일 너비 감지 (640px 이하)
@@ -383,5 +391,13 @@ export default function ExplorePage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function ExplorePage() {
+  return (
+    <Suspense fallback={<main style={{ background: c.ground, minHeight: "100vh" }} />}>
+      <ExplorePageInner />
+    </Suspense>
   );
 }

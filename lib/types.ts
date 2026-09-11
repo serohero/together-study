@@ -1,14 +1,24 @@
 // src/lib/types.ts
 // 도메인 타입. 서버·클라이언트 양쪽에서 씁니다.
 
-/** 방의 네 가지 포맷. DB enum과 1:1로 맞추세요. */
-export type FormatId = "test-prep" | "interview" | "project" | "study";
+/** 방의 다섯 가지 포맷. `study_types` 테이블의 code 값과 1:1로 맞추세요. */
+export type FormatId = "Test Prep" | "Interview Prep" | "Project" | "Study" | "Discussion";
 
+/**
+ * ▶ 주의: 이건 목업 데이터 전용 목록입니다 (lib/rooms.ts의 시드 방 생성기,
+ *   "지금 진행 중" 스트립에서만 씀). 실제 홈 화면 포맷 필터는 이제
+ *   real `study_types` 테이블을 씁니다 — lib/formatsDb.ts, hooks/useFormats.ts,
+ *   components/FormatPicker.tsx를 보세요.
+ *   여기 값은 study_types 테이블 내용과 1:1로 맞춰뒀지만, DB가 진실이고
+ *   이 배열은 그걸 옮겨 적어둔 것뿐입니다 — DB에 포맷을 추가/변경하면
+ *   여기도 같이 고쳐야 FormatId 타입·목업 데이터가 안 어긋납니다.
+ */
 export const FORMATS: { id: FormatId; label: string; blurb: string }[] = [
-  { id: "test-prep", label: "Test Prep", blurb: "One exam, one date" },
-  { id: "interview", label: "Interview", blurb: "Mock rounds, in pairs" },
-  { id: "project", label: "Project", blurb: "Build and ship something" },
-  { id: "study", label: "Study", blurb: "Show up and work" },
+  { id: "Test Prep", label: "Test Prep", blurb: "One exam, one date" },
+  { id: "Interview Prep", label: "Interview Prep", blurb: "Mock rounds, in pairs" },
+  { id: "Project", label: "Project", blurb: "Build and ship something" },
+  { id: "Study", label: "Study", blurb: "Show up and work in silence" },
+  { id: "Discussion", label: "Discussion", blurb: "Share insights and discuss" },
 ];
 
 /** 요일. 0 = 일요일 (JS Date.getDay()와 동일) */

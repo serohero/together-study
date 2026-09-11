@@ -12,7 +12,6 @@ import {
   type SearchQuery,
   type Weekday,
 } from "./types";
-import { getSubcategory } from "./taxonomy";
 
 const FORMAT_IDS = new Set<string>(FORMATS.map((f) => f.id));
 const DAYPART_IDS = new Set<string>(DAYPARTS.map((d) => d.id));
@@ -22,8 +21,9 @@ type ParamsLike = {
 };
 
 export function parseQuery(params: ParamsLike): SearchQuery {
+  // topic/field는 real categories 테이블의 layer_2/layer_1 값 그대로입니다
+  // (별도 slug id가 아니라 텍스트 자체가 id) — 그래서 조회 없이 그대로 씁니다.
   const topic = params.get("topic");
-  const sub = getSubcategory(topic);
 
   const formatRaw = params.get("format");
   const format: FormatId | null =
@@ -41,8 +41,8 @@ export function parseQuery(params: ParamsLike): SearchQuery {
     dpRaw && DAYPART_IDS.has(dpRaw) ? (dpRaw as DaypartId) : null;
 
   return {
-    subcategoryId: sub ? sub.id : null,
-    categoryId: sub ? sub.categoryId : params.get("field"),
+    subcategoryId: topic,
+    categoryId: params.get("field"),
     format,
     weekday,
     daypart,
@@ -52,7 +52,7 @@ export function parseQuery(params: ParamsLike): SearchQuery {
 export function serializeQuery(q: SearchQuery): string {
   const p = new URLSearchParams();
   if (q.subcategoryId) p.set("topic", q.subcategoryId);
-  else if (q.categoryId) p.set("field", q.categoryId);
+  if (q.categoryId) p.set("field", q.categoryId);
   if (q.format) p.set("format", q.format);
   if (q.weekday !== null) p.set("day", String(q.weekday));
   if (q.daypart) p.set("when", q.daypart);
@@ -74,14 +74,14 @@ export { EMPTY_QUERY };
 /* ---------------- 문장에 들어갈 라벨 ---------------- */
 
 export function topicLabel(q: SearchQuery): string {
-  const sub = getSubcategory(q.subcategoryId);
-  if (sub) return sub.label;
-  return "something";
+  // subcategoryId 자체가 real categories 테이블의 layer_2 텍스트(=라벨)입니다.
+  return q.subcategoryId ?? "something";
 }
 
 export function formatLabel(q: SearchQuery): string {
-  const f = FORMATS.find((x) => x.id === q.format);
-  return f ? f.label.toLowerCase() : "any format";
+  // FormatId 값 자체가 study_types.code(=화면에 뜨는 라벨)와 같은 텍스트라
+  // 별도 조회 없이 그대로 소문자로 씁니다.
+  return q.format ? q.format.toLowerCase() : "any format";
 }
 
 export function timeLabel(q: SearchQuery): string {

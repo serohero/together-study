@@ -37,28 +37,34 @@ const HOST_NAMES = [
 ];
 
 const TITLE_SHAPES: Record<FormatId, string[]> = {
-  "test-prep": [
+  "Test Prep": [
     "{topic} — full mock every week",
     "{topic}, timed drills",
     "{topic} before work",
     "{topic} — the sections everyone dodges",
   ],
-  interview: [
+  "Interview Prep": [
     "{topic} mocks, in rotating pairs",
     "{topic} — one presents, the room panels",
     "{topic} behavioural rounds",
     "{topic} interview reps",
   ],
-  project: [
+  Project: [
     "Ship a {topic} project in ten weeks",
     "{topic} — build in public, weekly",
     "{topic} portfolio piece, start to finish",
   ],
-  study: [
+  Study: [
     "{topic} — quiet hour, cameras on",
     "{topic} study, same six people",
     "{topic} — read and discuss",
     "Morning {topic}",
+  ],
+  Discussion: [
+    "{topic} — bring a take, defend it",
+    "{topic} roundtable, six chairs",
+    "{topic} — open floor, no slides",
+    "Weekly {topic} discussion",
   ],
 };
 
@@ -92,7 +98,7 @@ function buildRooms(): Room[] {
       const seatsTotal = [4, 5, 6, 6, 8][Math.floor(rng() * 5)];
       const quorum = Math.max(3, Math.ceil(seatsTotal * 0.6));
 
-      const weeksTotal = format === "project" ? 10 : format === "test-prep" ? 8 : 6;
+      const weeksTotal = format === "Project" ? 10 : format === "Test Prep" ? 8 : 6;
       const started = rng() < 0.45;
       const weekCurrent = started
         ? 1 + Math.floor(rng() * Math.max(1, weeksTotal - 1))
@@ -142,7 +148,7 @@ function buildRooms(): Room[] {
           sessionsRun: showRate === null ? 0 : 4 + Math.floor(rng() * 40),
         },
         examDate:
-          format === "test-prep"
+          format === "Test Prep"
             ? new Date(now + (40 + Math.floor(rng() * 80)) * 86400000)
                 .toISOString()
                 .slice(0, 10)
@@ -235,6 +241,15 @@ export function countRooms(q: SearchQuery): number {
   return ROOMS.reduce((n, r) => (matches(r, q) ? n + 1 : n), 0);
 }
 
+// 시드 데이터라 이 순간 진행 중인 방이 실제로 0개일 수 있습니다. 그럴 때
+// "N rooms meeting right now" 문구랑 그 아래 카드 개수를 이 값으로 맞춰서
+// 채웁니다 — 예전엔 31개였는데, 전체 방이 33개인데 31개가 "지금 진행 중"이라고
+// 뜨면 말이 안 되니 1~2개로 줄였습니다.
+// ▶ DB 연결 후 이 fallback은 통째로 지우고 real 값만 쓰면 됩니다.
+function mockLiveFallbackCount(now: Date): number {
+  return now.getMinutes() % 2 === 0 ? 1 : 2;
+}
+
 export function listLiveRooms(limit = 4, now = new Date()): Room[] {
   const live = ROOMS.filter((r) => isLive(r, now));
   if (live.length >= limit) {
@@ -243,9 +258,17 @@ export function listLiveRooms(limit = 4, now = new Date()): Room[] {
       .slice(0, limit)
       .map((r) => ({ ...r, liveSince: now.toISOString() }));
   }
-  // 시드 데이터라 지금 이 시각에 정말 진행 중인 방이 없을 수 있습니다.
-  // 데모가 비어 보이지 않게 "진행 중"으로 보일 방을 결정적으로 골라 채웁니다.
-  // ▶ 실제 DB를 붙이면 이 fallback 블록은 지우세요.
+  if (live.length === 0) {
+    // liveRoomCount()랑 같은 기준으로 1~2개만 채웁니다 — 문구랑 카드 개수가
+    // 안 맞으면 어색하니까요.
+    const fallbackCount = mockLiveFallbackCount(now);
+    return ROOMS.filter((r) => r.weekCurrent > 0)
+      .slice(0, fallbackCount)
+      .map((r, i) => ({
+        ...r,
+        liveSince: new Date(now.getTime() - (8 + i * 11) * 60000).toISOString(),
+      }));
+  }
   const filler = ROOMS.filter((r) => r.weekCurrent > 0 && !live.includes(r))
     .slice(0, limit - live.length)
     .map((r, i) => ({
@@ -257,7 +280,7 @@ export function listLiveRooms(limit = 4, now = new Date()): Room[] {
 
 export function liveRoomCount(now = new Date()): number {
   const real = ROOMS.filter((r) => isLive(r, now)).length;
-  return real > 0 ? real : 31; // ▶ DB 연결 후 `return real;` 로 바꾸세요.
+  return real > 0 ? real : mockLiveFallbackCount(now);
 }
 
 /* ------------------------------------------------------------------ */
@@ -268,10 +291,11 @@ export function computeCounts(q: SearchQuery): TaxonomyCounts {
   const byCategory: Record<string, number> = {};
   const bySubcategory: Record<string, number> = {};
   const byFormat = {
-    "test-prep": 0,
-    interview: 0,
-    project: 0,
-    study: 0,
+    "Test Prep": 0,
+    "Interview Prep": 0,
+    Project: 0,
+    Study: 0,
+    Discussion: 0,
   } as Record<FormatId, number>;
 
   for (const c of CATEGORIES) byCategory[c.id] = 0;

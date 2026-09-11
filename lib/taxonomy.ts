@@ -1,6 +1,12 @@
 // src/lib/taxonomy.ts
 // 팀에서 확정한 카테고리 7개 × 서브카테고리 84개.
 // 순서는 팀이 준 목록 그대로입니다. id는 URL에 그대로 들어가므로 바꾸지 마세요.
+//
+// ▶ 주의: 이건 목업 데이터 전용 목록입니다 (lib/rooms.ts의 시드 방 생성기,
+//   "지금 진행 중" 스트립에서만 씀). 실제 홈 화면 토픽 필터는 이제
+//   real `categories` 테이블(layer_1/layer_2)을 씁니다 — lib/categoriesDb.ts,
+//   hooks/useCategories.ts, components/TopicPicker.tsx를 보세요.
+//   이 파일의 목록과 real DB 목록은 서로 다른 별개의 taxonomy입니다.
 
 import type { Category, Subcategory } from "./types";
 
